@@ -19,7 +19,7 @@ import com.sample.app.R
 fun BaseFloat() {
     Box(
         modifier = Modifier
-            .size(100.dp)
+            .size(48.dp)
             .background(MaterialTheme.colorScheme.primary, CircleShape),
         contentAlignment = Alignment.Center
     ) {
