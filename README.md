@@ -35,7 +35,7 @@ Add the following dependency to your app's `build.gradle.kts` file:
 
 ```kotlin
 dependencies {
-    implementation("io.github.luiisca.floating.views:1.0.5")
+    implementation("io.github.luiisca:floating.views:1.0.5")
 }
 ```
 

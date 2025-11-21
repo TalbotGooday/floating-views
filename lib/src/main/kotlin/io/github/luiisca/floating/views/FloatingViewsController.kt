@@ -27,6 +27,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.platform.ComposeView
@@ -36,11 +37,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.app.ServiceCompat
 import io.github.luiisca.floating.views.helpers.FloatingViewsManager
+import io.github.luiisca.floating.views.helpers.NotificationHelper
+import io.github.luiisca.floating.views.helpers.toPx
 import io.github.luiisca.floating.views.ui.CloseFloat
 import io.github.luiisca.floating.views.ui.DraggableFloat
 import io.github.luiisca.floating.views.ui.FullscreenOverlayFloat
-import io.github.luiisca.floating.views.helpers.NotificationHelper
-import io.github.luiisca.floating.views.helpers.toPx
 
 enum class CloseBehavior {
     MAIN_SNAPS_TO_CLOSE_FLOAT,
@@ -49,15 +50,18 @@ enum class CloseBehavior {
 
 interface EventCallbacks {
     var onTap: ((Offset) -> Unit)?
+    var onKey: ((event: KeyEvent) -> Boolean)?
     var onDragStart: ((offset: Offset) -> Unit)?
     var onDrag: ((
         change: PointerInputChange,
         dragAmount: Offset,
         newPoint: Point,
-        newAnimatedPoint: Point?) -> Unit)?
+        newAnimatedPoint: Point?
+    ) -> Unit)?
     var onDragEnd: (() -> Unit)?
 }
-sealed interface FloatConfig: EventCallbacks {
+
+sealed interface FloatConfig : EventCallbacks {
     var startPointDp: PointF?
     var startPointPx: PointF?
     var draggingTransitionSpec: (Transition.Segment<Point>.() -> FiniteAnimationSpec<Int>)
@@ -112,7 +116,7 @@ sealed interface FloatConfig: EventCallbacks {
  * @property onDragStart Callback triggered when dragging of the floating view begins.
  * @property onDrag Callback triggered during dragging of the floating view.
  * @property onDragEnd Callback triggered when dragging of the floating view ends.
-*/
+ */
 data class MainFloatConfig(
     val composable: (@Composable () -> Unit)? = null,
     val viewFactory: ((Context) -> View)? = null,
@@ -134,7 +138,8 @@ data class MainFloatConfig(
         spring(
             dampingRatio = Spring.DampingRatioMediumBouncy,
             stiffness = Spring.StiffnessLow
-        )},
+        )
+    },
     override var isSnapToEdgeEnabled: Boolean = true,
     override var onTap: ((Offset) -> Unit)? = null,
     override var onDragStart: ((offset: Offset) -> Unit)? = null,
@@ -142,9 +147,11 @@ data class MainFloatConfig(
         change: PointerInputChange,
         dragAmount: Offset,
         newPoint: Point,
-        newAnimatedPoint: Point?) -> Unit)? = null,
+        newAnimatedPoint: Point?
+    ) -> Unit)? = null,
     override var onDragEnd: (() -> Unit)? = null,
-): FloatConfig
+    override var onKey: ((KeyEvent) -> Boolean)? = null
+) : FloatConfig
 
 /**
  * @property enabled If `true`, enables expanded view mode.
@@ -207,7 +214,7 @@ data class ExpandedFloatConfig(
     val tapOutsideToClose: Boolean = true,
     val dimAmount: Float = 0.5f,
     val composable: (@Composable (close: () -> Unit) -> Unit)? = null,
-    val viewFactory: ((context: Context, close:() -> Unit) -> View)? = null,
+    val viewFactory: ((context: Context, close: () -> Unit) -> View)? = null,
     override var startPointDp: PointF? = null,
     override var startPointPx: PointF? = null,
     override var draggingTransitionSpec: (Transition.Segment<Point>.() -> FiniteAnimationSpec<Int>) = {
@@ -226,7 +233,8 @@ data class ExpandedFloatConfig(
         spring(
             dampingRatio = Spring.DampingRatioMediumBouncy,
             stiffness = Spring.StiffnessLow
-        )},
+        )
+    },
     override var isSnapToEdgeEnabled: Boolean = true,
     override var onTap: ((Offset) -> Unit)? = null,
     override var onDragStart: ((offset: Offset) -> Unit)? = null,
@@ -234,9 +242,11 @@ data class ExpandedFloatConfig(
         change: PointerInputChange,
         dragAmount: Offset,
         newPoint: Point,
-        newAnimatedPoint: Point?) -> Unit)? = null,
+        newAnimatedPoint: Point?
+    ) -> Unit)? = null,
     override var onDragEnd: (() -> Unit)? = null,
-): FloatConfig
+    override var onKey: ((KeyEvent) -> Boolean)? = null
+) : FloatConfig
 
 
 /**
@@ -331,10 +341,10 @@ data class CloseFloatConfig(
         )
     },
     var snapToMainTransitionSpec: (Transition.Segment<Point>.() -> FiniteAnimationSpec<Int>) = {
-      spring(
-        dampingRatio = Spring.DampingRatioLowBouncy,
-        stiffness = Spring.StiffnessLow
-      )
+        spring(
+            dampingRatio = Spring.DampingRatioLowBouncy,
+            stiffness = Spring.StiffnessLow
+        )
     },
     var closeBehavior: CloseBehavior? = CloseBehavior.MAIN_SNAPS_TO_CLOSE_FLOAT,
     var followRate: Float = 0.1f,
@@ -416,7 +426,10 @@ class FloatingViewsController(
                 ServiceInfo.FOREGROUND_SERVICE_TYPE_MANIFEST
             )
         } else {
-            service.startForeground(notificationHelper.notificationId, notificationHelper.createDefaultNotification(notificationIcon, notificationTitle))
+            service.startForeground(
+                notificationHelper.notificationId,
+                notificationHelper.createDefaultNotification(notificationIcon, notificationTitle)
+            )
         }
     }
 
@@ -429,13 +442,13 @@ class FloatingViewsController(
         CreateFloatViews(
             context,
             config,
-            getFloatsCount = {floatsCount},
-            setFloatsCount = {floatsCount = it},
+            getFloatsCount = { floatsCount },
+            setFloatsCount = { floatsCount = it },
             stopService,
-            addViewToTrackingList = {view -> addedViews.add(view)},
+            addViewToTrackingList = { view -> addedViews.add(view) },
             composeOwner,
-            getIsComposeOwnerInit = {isComposeOwnerInit},
-            setIsComposeOwnerInit = {isComposeOwnerInit = it}
+            getIsComposeOwnerInit = { isComposeOwnerInit },
+            setIsComposeOwnerInit = { isComposeOwnerInit = it }
         )
     }
 
@@ -472,9 +485,9 @@ class CreateFloatViews(
     private var overlayView: ComposeView? = null
     private var closeView: ComposeView? = null
     private val mainStartPoint = Point(
-            (config.main.startPointDp?.x?.toPx() ?: config.main.startPointPx?.x ?: 0f).toInt(),
-            (config.main.startPointDp?.y?.toPx() ?: config.main.startPointPx?.y ?: 0f).toInt()
-        )
+        (config.main.startPointDp?.x?.toPx() ?: config.main.startPointPx?.x ?: 0f).toInt(),
+        (config.main.startPointDp?.y?.toPx() ?: config.main.startPointPx?.y ?: 0f).toInt()
+    )
     private val expandedStartPoint = Point(
         (config.expanded.startPointDp?.x?.toPx() ?: config.expanded.startPointPx?.x ?: 0f).toInt(),
         (config.expanded.startPointDp?.y?.toPx() ?: config.expanded.startPointPx?.y ?: 0f).toInt()
@@ -522,10 +535,10 @@ class CreateFloatViews(
                     layoutParams = mainLayoutParams,
                     closeLayoutParams = closeLayoutParams,
                     config = config,
-                    updateSize = {size ->
+                    updateSize = { size ->
                         updateSize(this, mainLayoutParams, size)
                     },
-                    onKey = { event ->
+                    onKey = config.main.onKey ?: { event ->
                         if (event.key == Key.Back) {
                             tryCloseDraggable()
 
@@ -551,18 +564,18 @@ class CreateFloatViews(
                     onDrag = config.main.onDrag,
                     onDragEnd = config.main.onDragEnd,
                 ) {
-                        when {
-                            config.main.viewFactory != null -> config.main.viewFactory.let { viewFactory ->
-                                AndroidView(
-                                    factory = { context ->
-                                        viewFactory(context)
-                                    }
-                                )
-                            }
-
-                            config.main.composable != null -> config.main.composable.invoke()
-                            else -> throw IllegalArgumentException("Either compose or view must be provided for MainFloat")
+                    when {
+                        config.main.viewFactory != null -> config.main.viewFactory.let { viewFactory ->
+                            AndroidView(
+                                factory = { context ->
+                                    viewFactory(context)
+                                }
+                            )
                         }
+
+                        config.main.composable != null -> config.main.composable.invoke()
+                        else -> throw IllegalArgumentException("Either compose or view must be provided for MainFloat")
+                    }
                 }
             }
         }
@@ -586,10 +599,10 @@ class CreateFloatViews(
                     closeLayoutParams = closeLayoutParams,
                     layoutParams = expandedLayoutParams,
                     config = config,
-                    updateSize = {size ->
+                    updateSize = { size ->
                         updateSize(this, expandedLayoutParams, size)
                     },
-                    onKey = { event ->
+                    onKey = config.expanded.onKey ?: { event ->
                         if (event.key == Key.Back) {
                             tryCloseDraggable()
 
@@ -612,20 +625,21 @@ class CreateFloatViews(
                     onDrag = config.expanded.onDrag,
                     onDragEnd = config.expanded.onDragEnd,
                 ) {
-                        when {
-                            config.expanded.viewFactory != null -> config.expanded.viewFactory.let { viewFactory ->
-                                AndroidView(
-                                    factory = { context ->
-                                        viewFactory(context) { tryCloseDraggable() }
-                                    }
-                                )
-                            }
-                            config.expanded.composable != null -> config.expanded.composable.let {composable ->
-                                composable { tryCloseDraggable() }
-                            }
-
-                            else -> throw IllegalArgumentException("Either compose or view must be provided for MainFloat")
+                    when {
+                        config.expanded.viewFactory != null -> config.expanded.viewFactory.let { viewFactory ->
+                            AndroidView(
+                                factory = { context ->
+                                    viewFactory(context) { tryCloseDraggable() }
+                                }
+                            )
                         }
+
+                        config.expanded.composable != null -> config.expanded.composable.let { composable ->
+                            composable { tryCloseDraggable() }
+                        }
+
+                        else -> throw IllegalArgumentException("Either compose or view must be provided for MainFloat")
+                    }
                 }
             }
         }
@@ -648,18 +662,18 @@ class CreateFloatViews(
                         height = size.height
                     })
                 }) {
-                        when {
-                            config.close.viewFactory != null -> config.close.viewFactory.let { factory ->
-                                AndroidView(
-                                    factory = { context ->
-                                        factory(context)
-                                    }
-                                )
-                            }
-
-                            config.close.composable != null -> config.close.composable.invoke()
-                            else -> DefaultCloseButton()
+                    when {
+                        config.close.viewFactory != null -> config.close.viewFactory.let { factory ->
+                            AndroidView(
+                                factory = { context ->
+                                    factory(context)
+                                }
+                            )
                         }
+
+                        config.close.composable != null -> config.close.composable.invoke()
+                        else -> DefaultCloseButton()
+                    }
                 }
             }
         }
@@ -707,7 +721,11 @@ class CreateFloatViews(
         }
     }
 
-    private fun updateSize(composeView: ComposeView, layoutParams: WindowManager.LayoutParams, size: IntSize) {
+    private fun updateSize(
+        composeView: ComposeView,
+        layoutParams: WindowManager.LayoutParams,
+        size: IntSize
+    ) {
         windowManager.updateViewLayout(composeView, layoutParams.apply {
             width = size.width
             height = size.height

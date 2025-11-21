@@ -1,5 +1,6 @@
 package com.sample.app
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -83,6 +84,10 @@ fun App() {
           val config = FloatingViewsConfig(
             enableAnimations = false,
             main = MainFloatConfig(
+              onKey = { event ->
+                Log.d("FloatingViews", "Key event: $event")
+                false
+              },
               composable = { PlayerFloat() },
               // Add other main float configurations here
             ),
