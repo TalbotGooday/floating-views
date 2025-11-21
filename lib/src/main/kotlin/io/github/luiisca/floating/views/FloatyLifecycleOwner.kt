@@ -85,7 +85,6 @@ class FloatLifecycleOwner :
 
     fun onStop() {
         lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
-
     }
 
     fun onDestroy() {

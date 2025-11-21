@@ -12,12 +12,12 @@ import androidx.compose.ui.input.pointer.pointerInput
 fun FullscreenOverlayFloat(onTap: ((Offset) -> Unit)? = null) {
     Box(
         modifier = Modifier
-          .fillMaxSize()
-          .pointerInput(Unit) {
-            detectTapGestures(
-              onTap = onTap
-            )
-          }
+            .fillMaxSize()
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onTap = onTap
+                )
+            }
     )
 }
 
