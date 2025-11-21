@@ -34,78 +34,78 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun BaseExpandedFloat(close: () -> Unit) {
-  var txt by remember { mutableStateOf("") }
-  var notes by remember { mutableStateOf(listOf<String>()) }
+    var txt by remember { mutableStateOf("") }
+    var notes by remember { mutableStateOf(listOf<String>()) }
 
-  Card(
-    modifier = Modifier
-      .heightIn(300.dp, 511.dp)
-      .widthIn(200.dp, 400.dp),
-    shape = RoundedCornerShape(12.dp)
-  ) {
-    Column(
-      modifier = Modifier
-        .fillMaxWidth()
-        .padding(16.dp),
-      verticalArrangement = Arrangement.Center,
-      horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-      // Close button
-      Button(
-        onClick = { close() },
+    Card(
         modifier = Modifier
-          .size(40.dp)
-          .clip(CircleShape)
-          .align(Alignment.End)
-          .background(MaterialTheme.colorScheme.primary),
-        contentPadding = PaddingValues(0.dp)
-      ) {
-        Icon(
-          imageVector = Icons.Rounded.Close,
-          contentDescription = "Hide expanded view",
-          modifier = Modifier.size(20.dp)
-        )
-      }
-
-      Spacer(modifier = Modifier.height(8.dp))
-
-      // Text input for note-taking
-      TextField(
-        value = txt,
-        onValueChange = { txt = it },
-        label = { Text("Enter your note") },
-        modifier = Modifier.fillMaxWidth()
-      )
-
-      Spacer(modifier = Modifier.height(8.dp))
-
-      // Save button to add the note to the list
-      Button(
-        onClick = {
-          if (txt.isNotBlank()) {
-            notes = notes + txt
-            txt = ""
-          }
-        },
-        modifier = Modifier.align(Alignment.End)
-      ) {
-        Text("Save Note")
-      }
-
-      Spacer(modifier = Modifier.height(16.dp))
-
-      // Display saved notes
-      LazyColumn {
-        items(notes.size) { note ->
-          Text(
-            text = notes[note],
+            .heightIn(300.dp, 511.dp)
+            .widthIn(200.dp, 400.dp),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Column(
             modifier = Modifier
-              .fillMaxWidth()
-              .padding(vertical = 4.dp),
-            style = MaterialTheme.typography.bodyLarge
-          )
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // Close button
+            Button(
+                onClick = { close() },
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .align(Alignment.End)
+                    .background(MaterialTheme.colorScheme.primary),
+                contentPadding = PaddingValues(0.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.Close,
+                    contentDescription = "Hide expanded view",
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Text input for note-taking
+            TextField(
+                value = txt,
+                onValueChange = { txt = it },
+                label = { Text("Enter your note") },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Save button to add the note to the list
+            Button(
+                onClick = {
+                    if (txt.isNotBlank()) {
+                        notes = notes + txt
+                        txt = ""
+                    }
+                },
+                modifier = Modifier.align(Alignment.End)
+            ) {
+                Text("Save Note")
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Display saved notes
+            LazyColumn {
+                items(notes.size) { note ->
+                    Text(
+                        text = notes[note],
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp),
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
+            }
         }
-      }
     }
-  }
 }

@@ -37,120 +37,120 @@ import io.github.luiisca.floating.views.helpers.FloatingViewsManager
 
 @Composable
 fun App() {
-  Scaffold { innerPadding ->
-    println(innerPadding)
+    Scaffold { innerPadding ->
+        println(innerPadding)
 
-    val context = LocalContext.current
-    val isServiceRunning by FloatServiceStateManager.isServiceRunning.collectAsState()
+        val context = LocalContext.current
+        val isServiceRunning by FloatServiceStateManager.isServiceRunning.collectAsState()
 
-    Column(
-      modifier = Modifier
-        .fillMaxSize()
-        .padding(16.dp),
-      verticalArrangement = Arrangement.Center,
-      horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-      // Base Float
-      Button(
-        modifier = Modifier.widthIn(min = 200.dp, max = 300.dp),
-        onClick = {
-          val config = FloatingViewsConfig(
-            enableAnimations = false,
-            main = MainFloatConfig(
-              composable = { BaseFloat() },
-              // Add other main float configurations here
-            ),
-            close = CloseFloatConfig(
-              closeBehavior = CloseBehavior.CLOSE_SNAPS_TO_MAIN_FLOAT,
-              // Add other close float configurations here
-            ),
-            expanded = ExpandedFloatConfig(
-              composable = {close -> BaseExpandedFloat(close) },
-              // Add other expanded float configurations here
-            )
-          )
-
-          // Launch a new music player floating view
-          FloatingViewsManager.startFloatServiceIfPermitted(context, config)
-        }
-      ) {
-        Text(text = "Base", style = MaterialTheme.typography.bodyLarge)
-      }
-
-      // Music Player Float
-      Button(
-        modifier = Modifier.widthIn(min = 200.dp, max = 300.dp),
-        onClick = {
-          val config = FloatingViewsConfig(
-            enableAnimations = false,
-            main = MainFloatConfig(
-              onKey = { event ->
-                Log.d("FloatingViews", "Key event: $event")
-                false
-              },
-              composable = { PlayerFloat() },
-              // Add other main float configurations here
-            ),
-            close = CloseFloatConfig(
-              composable = { PlayerCloseFloat()},
-              closeBehavior = CloseBehavior.CLOSE_SNAPS_TO_MAIN_FLOAT,
-              // Add other close float configurations here
-            ),
-            expanded = ExpandedFloatConfig(
-              composable = {close -> PlayerExpandedFloat(close) },
-              // Add other expanded float configurations here
-            )
-          )
-
-          // Launch a new music player floating view
-          FloatingViewsManager.startFloatServiceIfPermitted(context, config)
-        }
-      ) {
-        Text(text = "Music Player", style = MaterialTheme.typography.bodyLarge)
-      }
-
-      // Stopwatch Float
-      Button(
-        modifier = Modifier.widthIn(min = 200.dp, max = 300.dp),
-        onClick = {
-          val config = FloatingViewsConfig(
-            main = MainFloatConfig(
-              composable = { StopwatchFloat() },
-              // Add other main float configurations here
-            ),
-            close = CloseFloatConfig(
-              composable = { StopwatchCloseFloat() },
-              // Add other close float configurations here
-            ),
-            expanded = ExpandedFloatConfig(
-              enabled = false,
-              // Add other expanded float configurations here
-            )
-          )
-
-          // Launch a new stopwatch floating view
-          FloatingViewsManager.startFloatServiceIfPermitted(context, config)
-        }
-      ) {
-        Text(text = "Stopwatch", style = MaterialTheme.typography.bodyLarge)
-      }
-
-      // Display a button to stop the service if it's running
-      if (isServiceRunning) {
-        Spacer(modifier = Modifier.height(16.dp))
-        Button(
-          colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.error,
-            contentColor = MaterialTheme.colorScheme.onError
-          ),
-          modifier = Modifier.widthIn(min = 200.dp, max = 300.dp),
-          onClick = {
-            FloatingViewsManager.stopFloatService(context)
-          }
+        Column(
+            modifier = Modifier
+              .fillMaxSize()
+              .padding(16.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-          Text(text = "Remove all", style = MaterialTheme.typography.bodyLarge)
+            // Base Float
+            Button(
+                modifier = Modifier.widthIn(min = 200.dp, max = 300.dp),
+                onClick = {
+                    val config = FloatingViewsConfig(
+                        enableAnimations = false,
+                        main = MainFloatConfig(
+                            composable = { BaseFloat() },
+                            // Add other main float configurations here
+                        ),
+                        close = CloseFloatConfig(
+                            closeBehavior = CloseBehavior.CLOSE_SNAPS_TO_MAIN_FLOAT,
+                            // Add other close float configurations here
+                        ),
+                        expanded = ExpandedFloatConfig(
+                            composable = { close -> BaseExpandedFloat(close) },
+                            // Add other expanded float configurations here
+                        )
+                    )
+
+                    // Launch a new music player floating view
+                    FloatingViewsManager.startFloatServiceIfPermitted(context, config)
+                }
+            ) {
+                Text(text = "Base", style = MaterialTheme.typography.bodyLarge)
+            }
+
+            // Music Player Float
+            Button(
+                modifier = Modifier.widthIn(min = 200.dp, max = 300.dp),
+                onClick = {
+                    val config = FloatingViewsConfig(
+                        enableAnimations = false,
+                        main = MainFloatConfig(
+                            onKey = { event ->
+                                Log.d("FloatingViews", "Key event: $event")
+                                false
+                            },
+                            composable = { PlayerFloat() },
+                            // Add other main float configurations here
+                        ),
+                        close = CloseFloatConfig(
+                            composable = { PlayerCloseFloat() },
+                            closeBehavior = CloseBehavior.CLOSE_SNAPS_TO_MAIN_FLOAT,
+                            // Add other close float configurations here
+                        ),
+                        expanded = ExpandedFloatConfig(
+                            composable = { close -> PlayerExpandedFloat(close) },
+                            // Add other expanded float configurations here
+                        )
+                    )
+
+                    // Launch a new music player floating view
+                    FloatingViewsManager.startFloatServiceIfPermitted(context, config)
+                }
+            ) {
+                Text(text = "Music Player", style = MaterialTheme.typography.bodyLarge)
+            }
+
+            // Stopwatch Float
+            Button(
+                modifier = Modifier.widthIn(min = 200.dp, max = 300.dp),
+                onClick = {
+                    val config = FloatingViewsConfig(
+                        main = MainFloatConfig(
+                            composable = { StopwatchFloat() },
+                            // Add other main float configurations here
+                        ),
+                        close = CloseFloatConfig(
+                            composable = { StopwatchCloseFloat() },
+                            // Add other close float configurations here
+                        ),
+                        expanded = ExpandedFloatConfig(
+                            enabled = false,
+                            // Add other expanded float configurations here
+                        )
+                    )
+
+                    // Launch a new stopwatch floating view
+                    FloatingViewsManager.startFloatServiceIfPermitted(context, config)
+                }
+            ) {
+                Text(text = "Stopwatch", style = MaterialTheme.typography.bodyLarge)
+            }
+
+            // Display a button to stop the service if it's running
+            if (isServiceRunning) {
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error,
+                        contentColor = MaterialTheme.colorScheme.onError
+                    ),
+                    modifier = Modifier.widthIn(min = 200.dp, max = 300.dp),
+                    onClick = {
+                        FloatingViewsManager.stopFloatService(context)
+                    }
+                ) {
+                    Text(text = "Remove all", style = MaterialTheme.typography.bodyLarge)
+                }
+            }
         }
-      }
     }
-  }
 }
