@@ -169,6 +169,8 @@ fun DraggableFloat(
                 var animPoint by remember { mutableStateOf(Point(layoutParams.x, layoutParams.y)) }
 
                 var isCloseVisible by remember { mutableStateOf(false) }
+                // The close float's follow animation outlives the drag; only a live drag may show it.
+                var isDragging by remember { mutableStateOf(false) }
                 var initialClosePoint by remember { mutableStateOf<Point?>(null) }
                 var closeContentSize by remember { mutableStateOf<IntSize?>(null) }
                 var closeCrrPoint by remember { mutableStateOf<Point?>(null) }
@@ -351,8 +353,10 @@ fun DraggableFloat(
                                 x = closeAnimatedX
                                 y = closeAnimatedY
                             })
-                            closeView.visibility = View.VISIBLE
-                            isCloseVisible = true
+                            if (isDragging) {
+                                closeView.visibility = View.VISIBLE
+                                isCloseVisible = true
+                            }
                         }
                     }
                 }
@@ -363,6 +367,7 @@ fun DraggableFloat(
 
                     detectDragGestures(
                         onDragStart = { offset ->
+                            isDragging = true
                             onDragStart?.invoke(offset)
                         },
                         onDrag = { change, dragAmount ->
@@ -620,7 +625,16 @@ fun DraggableFloat(
                                 null,
                             )
                         },
+                        onDragCancel = {
+                            isDragging = false
+                            onDragEnd?.invoke()
+                            accDrag = PointF(0f, 0f)
+                            isCloseVisible = false
+                            withinCloseArea = false
+                            closeView.visibility = View.INVISIBLE
+                        },
                         onDragEnd = {
+                            isDragging = false
                             onDragEnd?.invoke()
                             accDrag = PointF(0f, 0f)
 
