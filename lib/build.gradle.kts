@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.compose.compiler)
+    `maven-publish`
 }
 
 android {
@@ -35,6 +36,9 @@ android {
             jvmTarget = JvmTarget.JVM_1_8
         }
     }
+    publishing {
+        singleVariant("release")
+    }
     buildFeatures {
         compose = true
     }
@@ -49,4 +53,16 @@ dependencies {
     implementation(libs.androidx.saved.state)
     implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
+}
+
+// JitPack runs publishToMavenLocal and overrides group/version from the tag.
+afterEvaluate {
+    publishing {
+        publications {
+            create<MavenPublication>("release") {
+                from(components["release"])
+                artifactId = "floating-views"
+            }
+        }
+    }
 }
